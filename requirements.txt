@@ -1,0 +1,6 @@
+pandas
+geopandas
+matplotlib
+requests
+census
+jupyter
