@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+data/raw/TTS_LBNL_public_file_29-Sep-2025_all.csv
+data/raw/tl_2022_us_zcta520/
+data/raw/tl_2022_17_tract/
