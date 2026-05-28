@@ -8,14 +8,14 @@ PROC = "data/processed"
 MAPS = "maps"
 os.makedirs(MAPS, exist_ok=True)
 
-# ── Load ──────────────────────────────────────────────────────────────────────
+
 merged = gpd.read_file(f"{PROC}/solar_equity_merged.gpkg")
 df = merged.dropna(subset=["median_income", "total_pop", "income_quartile"]).copy()
 df = df[df["total_pop"] > 0].copy()
 df["income_quartile"] = df["income_quartile"].astype(str)
 print(f"Tracts loaded: {len(df)}")
 
-# ── Stats ─────────────────────────────────────────────────────────────────────
+# Stats
 adoption_by_income = (
     df.groupby("income_quartile")["solar_per_1000_units"]
     .mean().reset_index()
@@ -24,7 +24,7 @@ order = ["Q1_lowest", "Q2", "Q3", "Q4_highest"]
 q4 = adoption_by_income.loc[adoption_by_income["income_quartile"]=="Q4_highest","solar_per_1000_units"].values[0]
 q1 = adoption_by_income.loc[adoption_by_income["income_quartile"]=="Q1_lowest", "solar_per_1000_units"].values[0]
 
-# Zero-solar tract breakdown
+
 zero_by_quartile = df.groupby("income_quartile").apply(
     lambda x: (x["num_installations"] == 0).sum()
 ).reset_index()
@@ -45,7 +45,7 @@ q1_pct = zero_by_quartile.loc[zero_by_quartile["income_quartile"]=="Q1_lowest","
 print(f"\nKEY FINDING: {q1_zero} of {q1_total} lowest-income tracts ({q1_pct:.0f}%) have ZERO solar installations")
 print(f"Annual unrealized savings: $52.9M")
 
-# ── Chart 1: Adoption rate by quartile ────────────────────────────────────────
+# Chart 1
 labels = ["Lowest\nIncome (Q1)", "Q2", "Q3", "Highest\nIncome (Q4)"]
 vals   = [adoption_by_income.loc[adoption_by_income["income_quartile"]==q,
           "solar_per_1000_units"].values[0] for q in order]
@@ -65,7 +65,7 @@ plt.savefig(f"{MAPS}/chart_adoption_by_income.png", dpi=150, bbox_inches="tight"
 plt.close()
 print(f"\nSaved: {MAPS}/chart_adoption_by_income.png")
 
-# ── Chart 2: % tracts with zero solar ─────────────────────────────────────────
+# Chart 2
 pct_vals = [zero_by_quartile.loc[zero_by_quartile["income_quartile"]==q,"pct_zero"].values[0] for q in order]
 
 fig, ax = plt.subplots(figsize=(8, 5))
@@ -83,7 +83,7 @@ plt.savefig(f"{MAPS}/chart_zero_solar_by_income.png", dpi=150, bbox_inches="tigh
 plt.close()
 print(f"Saved: {MAPS}/chart_zero_solar_by_income.png")
 
-# ── Map 1: Solar adoption rate ────────────────────────────────────────────────
+# Map 1
 fig, ax = plt.subplots(figsize=(10, 12))
 df.plot(column="solar_per_1000_units", ax=ax, cmap="YlGn", legend=True)
 ax.set_title("Rooftop Solar Adoption Rate\nby Illinois Census Tract",
@@ -94,7 +94,7 @@ plt.savefig(f"{MAPS}/map_solar_adoption.png", dpi=150, bbox_inches="tight")
 plt.close()
 print(f"Saved: {MAPS}/map_solar_adoption.png")
 
-# ── Map 2: Equity gap (zero-solar low-income vs high-adoption high-income) ─────
+# Map 2
 avg_solar = df["solar_per_1000_units"].mean()
 gap_tracts  = df[(df["income_quartile"] == "Q1_lowest") & (df["num_installations"] == 0)]
 high_tracts = df[(df["income_quartile"] == "Q4_highest") & (df["solar_per_1000_units"] >= avg_solar)]
